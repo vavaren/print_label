@@ -19,7 +19,7 @@ var quill = new Quill('#editor-container', {
     theme: 'snow',
     modules: {
         toolbar: [
-            ['bold', 'italic', 'underline', "strike"], [{ 'align': '' }, { 'align': 'center' }, { 'align': 'right' }]
+            ['bold', 'italic', 'underline', "strike"], [{ 'align': 'center' }]
 
         ]
     },
@@ -27,6 +27,13 @@ var quill = new Quill('#editor-container', {
 });
 quill.root.style.textAlign="center"
 quill.format('align', 'center');
+quill.on('text-change', function() {
+    const format = quill.getFormat();
+    if (format.align !== 'center') {
+        quill.format('align', 'center');
+    }
+});
+
 
 function websitePrint() {
     const button = document.querySelector('button[onclick="websitePrint()"]');
@@ -256,3 +263,4 @@ quill.on('text-change', websitePreview);
 document.getElementById('input-barcode').addEventListener('input', websitePreview);
 document.getElementById('input-size').addEventListener('input', websitePreview);
 document.getElementById('if-barcode').addEventListener('input', websitePreview);
+
