@@ -1,0 +1,29 @@
+{
+  "name": "dymo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-css": "npx tailwindcss -i ./src/style.css -o ./dist/style.css --watch",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "cors": "^2.8.5",
+    "dymojs": "^1.2.0",
+    "express": "^4.19.2",
+    "fs": "^0.0.1-security",
+    "handsontable": "^14.4.0",
+    "he": "^1.2.0",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39"
+  },
+  "keywords": [],
+  "description": ""
+}
