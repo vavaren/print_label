@@ -1,5 +1,15 @@
 const port = 63425;
-const host = "192.168.88.167";
+
+let host;
+
+fetch('/network')
+    .then(response => response.text())
+    .then(data => {
+        host = data;
+        console.log(`Host: ${host}`);
+    })
+    .catch(err => console.error('Error fetching network file:', err));
+
 
 let hot;
 let performSearch;
@@ -19,6 +29,10 @@ quill.root.style.textAlign="center"
 quill.format('align', 'center');
 
 function websitePrint() {
+    const button = document.querySelector('button[onclick="websitePrint()"]');
+    button.classList.remove('bg-slate-800');
+    button.classList.add('bg-slate-500');
+
     const text = encodeURIComponent(quill.root.innerHTML);
     const barcode = encodeURIComponent(document.getElementById('input-barcode').value);
     const copies = encodeURIComponent(document.getElementById('input-copies').value);
@@ -26,11 +40,31 @@ function websitePrint() {
     const if_barcode = encodeURIComponent(document.getElementById('if-barcode').value);
 
     fetch(`http://${host}:${port}/print?text=${text}&barcode=${barcode}&label_size=${label_size}&if_barcode=${if_barcode}&copies=${copies}`)
-        //.then((response) => response.json())
-        .then((data) => console.log(data))
-        .catch((err) => console.error(err));
+        .then(response => {
+            if (response.ok) {
+                button.classList.remove('bg-slate-500');
+                button.classList.add('bg-green-500');
+            } else {
+                button.classList.remove('bg-slate-500');
+                button.classList.add('bg-red-500');
+            }
+            setTimeout(() => {
+                button.classList.remove('bg-green-500', 'bg-red-500');
+                button.classList.add('bg-slate-800');
+            }, 2000);
+            return response.text();
+        })
+        .then(data => console.log(data))
+        .catch(err => {
+            console.error(err);
+            button.classList.remove('bg-slate-500');
+            button.classList.add('bg-red-500');
+            setTimeout(() => {
+                button.classList.remove('bg-red-500');
+                button.classList.add('bg-slate-800');
+            }, 2000);
+        });
 }
-
 function websitePreview() {
     clearTimeout(previewTimeout); // Clear any existing timeout
 
@@ -49,7 +83,7 @@ function websitePreview() {
             .catch((error) => console.error('Error fetching the image:', error));
     }, 300); // Delay preview updates by 300ms
 }
-fetch('./Visma-artiklar-01072024.xlsx')
+fetch('./Visma-artiklar-03012025.xlsx')
     .then((response) => response.arrayBuffer())
     .then((arrayBuffer) => {
         const workbook = XLSX.read(arrayBuffer, { type: 'buffer' });

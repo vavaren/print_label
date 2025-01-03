@@ -11,10 +11,9 @@
 </head>
 <body class="h-full bg-slate-200">
     <div class="flex h-full">
-        <div id="menu" class="bg-slate-500 w-[30vw] p-7 flex-shrink-0 sticky top-0 z-50 h-screen overflow-auto">
+        <div id="menu" class="bg-slate-500 w-[30vw] p-7 flex-shrink-0 sticky top-0 h-screen overflow-auto">
             <label><input type="checkbox" id="barcode-reading" value="false"> Streckkodsläsning</label>
             <div class="bg-white">
-
                 <div id="editor-container" class="mb-2 p-2 border rounded h-[15vh] w-full"></div>
             </div>
             <input id="input-barcode" type="text" placeholder="Streckkod" class="mb-2 p-2 border rounded w-full" value="">
@@ -24,12 +23,12 @@
                     <option value="stor">Stor</option>
                     <option value="liten">Liten</option>
                 </select>
-                <select id="if-barcode" class="p-2 mb-2  border rounded bg-white">
+                <select id="if-barcode" class="p-2 mb-2 border rounded bg-white">
                     <option value="true">Med streckkod</option>
                     <option value="false">Utan streckkod</option>
                 </select>
             </div>
-            <button class="bg-slate-800 text-white p-2 mb-2 rounded w-full" onclick="websitePrint()">Print Label</button>
+            <button class="bg-slate-800 bg-slate-500:active text-white p-2 mb-2 rounded w-full" onclick="websitePrint()">Print Label</button>
             <img id="preview-label" src="" class="" />
             <div id="search-container" class="mb-4 p-4">
                 <input id="global-search" type="text" placeholder="Sök..." class="mb-2 p-2 border rounded w-full">
@@ -41,10 +40,9 @@
                     <label><input type="checkbox" id="search-barcode" value="Barcode"> Streckkod</label>
                 </div>
             </div>
-			<input id="invisible-barcode-input" type="text" class="absolute top-0 left-0 w-full h-full opacity-0 pointer-events-none" aria-hidden="true" />
-
+            <input id="invisible-barcode-input" type="text" class="absolute top-0 left-0 w-full h-full opacity-0 pointer-events-none" aria-hidden="true" />
         </div>
-        <div class="flex-grow h-screen">
+        <div class="flex-grow h-screen overflow-auto">
             <div id="excel-data" class=""></div>
         </div>
     </div>

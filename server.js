@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { parseHTMLToXML } from './parse-html-to-xml.js';
 import { readLabelFile } from './read-label-file.js';
+import fs from 'fs'; // Add this line
 
 const app = express();
 app.use(cors());
@@ -19,6 +20,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(express.static(path.join(__dirname, './public')));
+
+app.get('/network', (req, res) => {
+    const networkFilePath = path.join(__dirname, 'secrets/network.txt');
+    fs.readFile(networkFilePath, 'utf8', (err, data) => {
+        if (err) {
+            res.status(500).send('Error reading network file');
+        } else {
+            res.send(data.split('\n')[0].trim());
+        }
+    });
+});
 
 async function labelStringManipulation(label_size, if_barcode, text, alignment, barcode) {
     const filePath = path.join(__dirname, `./labels/${label_size}-${if_barcode}.label`);
@@ -65,7 +77,6 @@ async function previewLabel(req) {
         }
     }
 }
-
 // Function to print the label
 async function printLabel(req) {
     let copies = req.copies || 1;
@@ -102,6 +113,7 @@ async function printLabel(req) {
                 httpsAgent: agent
             }
         );
+        return response.data;
     } catch (error) {
         console.error('Error sending print request:', error.message);
         if (error.response) {
@@ -109,6 +121,7 @@ async function printLabel(req) {
             console.error('Response status:', error.response.status);
             console.error('Response headers:', error.response.headers);
         }
+        throw new Error('Error sending print request');
     }
 }
 
@@ -117,6 +130,7 @@ app.get('/print', async (req, res) => {
         await printLabel(req.query);
         res.sendStatus(200);
     } catch (error) {
+        console.error('Error printing label:', error.message);
         res.status(500).send('Error printing label');
     }
 });
