@@ -21,14 +21,15 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.static(path.join(__dirname, './public')));
 
-// Read network.txt file at runtime and store its content in a variable
-const networkFilePath = path.join(__dirname, 'secrets/network.txt');
+// Read network.json file at runtime and store its content in a variable
+const networkFilePath = path.join(__dirname, 'secrets/network.json');
 let networkData = '';
 
 async function readNetworkFile() {
     try {
         const data = await fs.promises.readFile(networkFilePath, 'utf8');
-        networkData = data.split('\n')[0].trim();
+        const jsonData = JSON.parse(data);
+        networkData = jsonData["ip-adress"];
     } catch (err) {
         console.error('Error reading network file:', err);
     }
