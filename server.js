@@ -21,15 +21,25 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.static(path.join(__dirname, './public')));
 
+// Read network.txt file at runtime and store its content in a variable
+const networkFilePath = path.join(__dirname, 'secrets/network.txt');
+let networkData = '';
+
+async function readNetworkFile() {
+    try {
+        const data = await fs.promises.readFile(networkFilePath, 'utf8');
+        networkData = data.split('\n')[0].trim();
+    } catch (err) {
+        console.error('Error reading network file:', err);
+    }
+}
+
 app.get('/network', (req, res) => {
-    const networkFilePath = path.join(__dirname, 'secrets/network.txt');
-    fs.readFile(networkFilePath, 'utf8', (err, data) => {
-        if (err) {
-            res.status(500).send('Error reading network file');
-        } else {
-            res.send(data.split('\n')[0].trim());
-        }
-    });
+    if (networkData) {
+        res.send(networkData);
+    } else {
+        res.status(500).send('Error reading network data');
+    }
 });
 
 async function labelStringManipulation(label_size, if_barcode, text, alignment, barcode) {
@@ -144,6 +154,9 @@ app.get('/preview', async (req, res) => {
     }
 });
 
-app.listen(port, '0.0.0.0', () => {
-    console.log(`Server listening at http://0.0.0.0:${port}`);
+readNetworkFile().then(() => {
+    app.listen(port, '0.0.0.0', () => {
+        console.log(`Server listening at http://0.0.0.0:${port}`);
+        console.log(`Access the server at http://${networkData}:${port}`);
+    });
 });
