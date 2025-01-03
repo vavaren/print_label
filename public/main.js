@@ -38,7 +38,7 @@ quill.on('text-change', function() {
 function websitePrint() {
     const button = document.querySelector('button[onclick="websitePrint()"]');
     button.classList.remove('bg-slate-800');
-    button.classList.add('bg-slate-500');
+    button.classList.add('bg-slate-700');
 
     const text = encodeURIComponent(quill.root.innerHTML);
     const barcode = encodeURIComponent(document.getElementById('input-barcode').value);
@@ -48,11 +48,10 @@ function websitePrint() {
 
     fetch(`http://${host}:${port}/print?text=${text}&barcode=${barcode}&label_size=${label_size}&if_barcode=${if_barcode}&copies=${copies}`)
         .then(response => {
+            button.classList.remove('bg-slate-700');
             if (response.ok) {
-                button.classList.remove('bg-slate-500');
                 button.classList.add('bg-green-500');
             } else {
-                button.classList.remove('bg-slate-500');
                 button.classList.add('bg-red-500');
             }
             setTimeout(() => {
@@ -64,7 +63,7 @@ function websitePrint() {
         .then(data => console.log(data))
         .catch(err => {
             console.error(err);
-            button.classList.remove('bg-slate-500');
+            button.classList.remove('bg-slate-700');
             button.classList.add('bg-red-500');
             setTimeout(() => {
                 button.classList.remove('bg-red-500');
@@ -264,3 +263,8 @@ document.getElementById('input-barcode').addEventListener('input', websitePrevie
 document.getElementById('input-size').addEventListener('input', websitePreview);
 document.getElementById('if-barcode').addEventListener('input', websitePreview);
 
+document.getElementById('print-button').addEventListener('keydown', function(event) {
+    if (event.code === 'Space') {       
+        event.preventDefault();
+    }
+});
