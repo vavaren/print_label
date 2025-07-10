@@ -48,7 +48,11 @@ export function parseHTMLToXML(encodedText) {
 }
 
 function createXMLElement(content, tags, addNewLine) {
-    const typeProduct = ["handduk", "badlakan", '1,'];
+    const typeProduct = ["handduk", "badlakan", 'bäddset', "örngott", "påslakan", "dubbelpåslakan", 
+        "bordsduk", "strandkudde", "servett", "morgonrock", "kuddfodral", "bordstablett", "tablett", 
+        "badrumsmatta", "kökshandduk", "winservett", "midjeförkläde", "kockförkläde", "bröstlappsförkläde", 
+        "barnförkläde", "necessär", "hårturban", "löpare", "badcape", "grytlapp", "gästhandduk", "brödkorg",
+    "skurtrasa", "disktrasa", "underlakan", "dopservett", ];
     const isBold = tags.includes('strong');
     const isItalic = tags.includes('em');
     const isUnderline = tags.includes('u');
