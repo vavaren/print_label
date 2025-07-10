@@ -1,4 +1,5 @@
 // htmlparser.js
+import { text } from 'express';
 import he from 'he';
 
 // Function to parse the HTML and transform to the desired XML format
@@ -47,11 +48,22 @@ export function parseHTMLToXML(encodedText) {
 }
 
 function createXMLElement(content, tags, addNewLine) {
+    const typeProduct = ["handduk", "badlakan", '1,'];
     const isBold = tags.includes('strong');
     const isItalic = tags.includes('em');
     const isUnderline = tags.includes('u');
 
-    const textContent = (addNewLine ? '\n' : '') + he.decode(content);
+    let textContent = (addNewLine ? '\n' : '') + he.decode(content);
+    const words = textContent.split(' ');
+    // console.log(words)
+    if (words.length > 1 && typeProduct.includes(words[1])) {
+        // Flip the first and second words
+        [words[0], words[1]] = [words[1], words[0]];
+    }
+
+    // Join the words back into a string
+    textContent = words.join(' ');
+    // console.log(textContent);
 
     return `
 <Element>
