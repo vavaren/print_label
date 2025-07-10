@@ -68,7 +68,7 @@ async function previewLabel(req) {
 
     try {
         const response = await axios.post(
-            'https://127.0.0.1:41951/DYMO/DLS/Printing/RenderLabel',
+            'https://127.0.0.1:41952/DYMO/DLS/Printing/RenderLabel',
             label,
             {
                 headers: {
@@ -115,7 +115,7 @@ async function printLabel(req) {
 
     try {
         const response = await axios.post(
-            'https://127.0.0.1:41951/DYMO/DLS/Printing/PrintLabel',
+            'https://127.0.0.1:41952/DYMO/DLS/Printing/PrintLabel',
             formattedData,
             {
                 headers: {
