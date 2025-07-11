@@ -10,6 +10,11 @@ fetch('/network')
     })
     .catch(err => console.error('Error fetching network file:', err));
 
+const patterns = ["köksrutan", "malen", "båstad", "hov", "troentorp", "skanör", "classic", 
+    "råå", "lin i kvadrat", "domsten", "brantevik", "herrgård", "davids harpa", "rutan", 
+    "tylösand", "lya", "sofiero", "steninge", "grevie", "gastronomi", "clublinne", "mormor", 
+    "skåne", "kattegatt", "royal", "småryd", "viken", "falsterbo", "arild", "gåsöga", "vejby", 
+    "torekov", "lervik", "kattvik", "tryck", "brodyr", "svinnsmart" ]
 
 let hot;
 let performSearch;
@@ -172,10 +177,40 @@ function displayDataInTable(data) {
             const streckkodIndex = columnNames.indexOf('Streckkod');
 
             // Retrieve data for "benämning" and "streckkod" from the selected row
-            const benamningData = rowData[benamningIndex];
+            let benamningData = rowData[benamningIndex];
+            // console.log('Benämning Data:', benamningData);
+
+                        // ...existing code...
+            for (const pattern of patterns) {
+                if (
+                    benamningData &&
+                    benamningData.toLowerCase().startsWith(pattern)
+                ) {
+                    // Remove the pattern from the start (case-insensitive)
+                    let cleaned = benamningData.replace(new RegExp('^' + pattern, 'i'), '').trim();
+            
+                    // Split into words
+                    let words = cleaned.split(/\s+/);
+            
+                    // Insert the pattern after the first word, preserving its original capitalization
+                    words.splice(1, 0, benamningData.substr(0, pattern.length));
+            
+                    // Join the words
+                    benamningData = words.join(' ');
+            
+                    // Capitalize the first character if needed (but don't change the pattern's capitalization)
+                    benamningData = benamningData.charAt(0).toUpperCase() + benamningData.slice(1);
+            
+                    break; // Only process the first matching pattern
+                }
+            }
+            // ...existing code...
+
+
             const streckkodData = rowData[streckkodIndex];
 
             quill.root.innerHTML = benamningData;
+            // console.log(benamningData)
             document.getElementById('input-barcode').value = streckkodData ? streckkodData.slice(0, 12) : '';
 
             websitePreview();

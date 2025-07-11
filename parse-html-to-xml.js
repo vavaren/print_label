@@ -48,26 +48,14 @@ export function parseHTMLToXML(encodedText) {
 }
 
 function createXMLElement(content, tags, addNewLine) {
-    const typeProduct = ["handduk", "badlakan", 'bäddset', "örngott", "påslakan", "dubbelpåslakan", 
-        "bordsduk", "strandkudde", "servett", "morgonrock", "kuddfodral", "bordstablett", "tablett", 
-        "badrumsmatta", "kökshandduk", "winservett", "midjeförkläde", "kockförkläde", "bröstlappsförkläde", 
-        "barnförkläde", "necessär", "hårturban", "löpare", "badcape", "grytlapp", "gästhandduk", "brödkorg",
-    "skurtrasa", "disktrasa", "underlakan", "dopservett", ];
+
     const isBold = tags.includes('strong');
     const isItalic = tags.includes('em');
     const isUnderline = tags.includes('u');
 
     let textContent = (addNewLine ? '\n' : '') + he.decode(content);
-    const words = textContent.split(' ');
-    // console.log(words)
-    if (words.length > 1 && typeProduct.includes(words[1])) {
-        // Flip the first and second words
-        [words[0], words[1]] = [words[1], words[0]];
-    }
 
-    // Join the words back into a string
-    textContent = words.join(' ');
-    // console.log(textContent);
+    // console.log(words)
 
     return `
 <Element>
@@ -93,7 +81,7 @@ function getAlignment(fullMatch) {
     return 'Left';
 }
 
-// // Example usage
+// Example usage
 // const encodedText = "%3Cp%3E%3Cstrong%3EJulpaket%201%2C%20b%C3%A4ddset%20Steninge150x210%20cm%2C%20m%C3%B6rkgr%C3%B6n%3C%2Fstrong%3E%3C%2Fp%3E%3Cp%20class%3D%22ql-align-center%22%3E%3Cstrong%3EJulpaket%201%2C%20b%C3%A4ddset%20Steninge150x210%20cm%2C%20m%C3%B6rkgr%C3%B6n%3C%2Fstrong%3E%3C%2Fp%3E%3Cp%20class%3D%22ql-align-right%22%3E%3Cstrong%3EJulpaket%201%2C%20b%C3%A4ddset%20Steninge150x210%20cm%2C%20m%C3%B6rkgr%C3%B6n%3C%2Fstrong%3E%3C%2Fp%3E";
 // const result = parseHTMLToXML(encodedText);
 // console.log('Decoded URI Component:', decodeURIComponent(encodedText));
