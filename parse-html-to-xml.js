@@ -1,4 +1,5 @@
 // htmlparser.js
+import { text } from 'express';
 import he from 'he';
 
 // Function to parse the HTML and transform to the desired XML format
@@ -47,11 +48,14 @@ export function parseHTMLToXML(encodedText) {
 }
 
 function createXMLElement(content, tags, addNewLine) {
+
     const isBold = tags.includes('strong');
     const isItalic = tags.includes('em');
     const isUnderline = tags.includes('u');
 
-    const textContent = (addNewLine ? '\n' : '') + he.decode(content);
+    let textContent = (addNewLine ? '\n' : '') + he.decode(content);
+
+    // console.log(words)
 
     return `
 <Element>
@@ -77,7 +81,7 @@ function getAlignment(fullMatch) {
     return 'Left';
 }
 
-// // Example usage
+// Example usage
 // const encodedText = "%3Cp%3E%3Cstrong%3EJulpaket%201%2C%20b%C3%A4ddset%20Steninge150x210%20cm%2C%20m%C3%B6rkgr%C3%B6n%3C%2Fstrong%3E%3C%2Fp%3E%3Cp%20class%3D%22ql-align-center%22%3E%3Cstrong%3EJulpaket%201%2C%20b%C3%A4ddset%20Steninge150x210%20cm%2C%20m%C3%B6rkgr%C3%B6n%3C%2Fstrong%3E%3C%2Fp%3E%3Cp%20class%3D%22ql-align-right%22%3E%3Cstrong%3EJulpaket%201%2C%20b%C3%A4ddset%20Steninge150x210%20cm%2C%20m%C3%B6rkgr%C3%B6n%3C%2Fstrong%3E%3C%2Fp%3E";
 // const result = parseHTMLToXML(encodedText);
 // console.log('Decoded URI Component:', decodeURIComponent(encodedText));
