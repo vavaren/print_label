@@ -70,6 +70,9 @@ Notes:
 - `GET /config/rooms` room config + probe status
 - `POST /config/room` set active room
 - `GET /diagnostics` server diagnostics
+- `GET /diagnostics/printers/local` local DYMO status + printer list
+- `GET /diagnostics/printers/rooms` status + printers for all configured rooms
+- `GET /diagnostics/printers?room=roomA` status + printers for one room
 
 ## Templates
 

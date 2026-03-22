@@ -278,6 +278,93 @@ async function tryRawSocket(endpoint) {
     return 'raw';
 }
 
+function parsePrinterNames(rawData) {
+    if (typeof rawData !== 'string') {
+        return [];
+    }
+
+    const names = [];
+    const regex = /<Name>(.*?)<\/Name>/gi;
+    let match = null;
+
+    while ((match = regex.exec(rawData)) !== null) {
+        names.push(match[1]);
+    }
+
+    return [...new Set(names)];
+}
+
+async function fetchDymoStatus(endpoint, timeoutMs = 1500) {
+    const agent = new https.Agent({ rejectUnauthorized: false });
+    const response = await axios.get(
+        `${endpoint}/DYMO/DLS/Printing/StatusConnected`,
+        {
+            httpsAgent: agent,
+            timeout: timeoutMs,
+        },
+    );
+    return response.data;
+}
+
+async function fetchDymoPrinters(endpoint, timeoutMs = 1500) {
+    const agent = new https.Agent({ rejectUnauthorized: false });
+    const response = await axios.get(
+        `${endpoint}/DYMO/DLS/Printing/GetPrinters`,
+        {
+            httpsAgent: agent,
+            timeout: timeoutMs,
+        },
+    );
+
+    return {
+        raw: response.data,
+        names: parsePrinterNames(response.data),
+    };
+}
+
+async function collectRoomDebug(roomKey) {
+    ensureRoomConfig();
+    const room = roomConfig[roomKey];
+    if (!room) {
+        throw new Error(`Unknown room: ${roomKey}`);
+    }
+
+    const endpoint = room.endpoint || DEFAULT_450_ENDPOINT;
+    const protocol = room.protocol || DEFAULT_450_PROTOCOL;
+    const timeoutMs = room.timeoutMs || DEFAULT_NETWORK_TIMEOUT_MS;
+
+    const result = {
+        room: roomKey,
+        label: room.label || roomKey,
+        endpoint,
+        protocol,
+        reachable: false,
+        statusConnected: null,
+        printers: [],
+        rawPrintersResponse: null,
+        error: null,
+    };
+
+    try {
+        if (protocol === 'raw') {
+            await tryRawSocket(endpoint);
+            result.reachable = true;
+            return result;
+        }
+
+        result.statusConnected = await fetchDymoStatus(endpoint, timeoutMs);
+        result.reachable = true;
+
+        const printerInfo = await fetchDymoPrinters(endpoint, timeoutMs);
+        result.printers = printerInfo.names;
+        result.rawPrintersResponse = printerInfo.raw;
+        return result;
+    } catch (error) {
+        result.error = error.message;
+        return result;
+    }
+}
+
 async function probeRoomBProtocol() {
     ensureRoomConfig();
     const roomB = roomConfig.roomB;
@@ -401,7 +488,7 @@ async function sendPrintOperation(route, operation, payload) {
             timeout: route.timeoutMs,
         },
     );
-
+    1;
     return response.data;
 }
 
@@ -575,6 +662,56 @@ app.get('/diagnostics', (req, res) => {
         probeStatus,
         rooms: roomConfig,
     });
+});
+
+app.get('/diagnostics/printers/local', async (req, res) => {
+    try {
+        const localEndpoint = DEFAULT_450_ENDPOINT;
+        const statusConnected = await fetchDymoStatus(localEndpoint, 2000);
+        const printerInfo = await fetchDymoPrinters(localEndpoint, 2000);
+
+        res.json({
+            endpoint: localEndpoint,
+            statusConnected,
+            printers: printerInfo.names,
+            rawPrintersResponse: printerInfo.raw,
+        });
+    } catch (error) {
+        res.status(500).json({
+            endpoint: DEFAULT_450_ENDPOINT,
+            error: error.message,
+        });
+    }
+});
+
+app.get('/diagnostics/printers/rooms', async (req, res) => {
+    try {
+        ensureRoomConfig();
+        const roomKeys = Object.keys(roomConfig);
+        const details = await Promise.all(
+            roomKeys.map((roomKey) => collectRoomDebug(roomKey)),
+        );
+
+        res.json({
+            activeRoom,
+            details,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/diagnostics/printers', async (req, res) => {
+    try {
+        const roomKey = resolveRoom(req.query.room);
+        const detail = await collectRoomDebug(roomKey);
+        res.json(detail);
+    } catch (error) {
+        const status = String(error.message).includes('Unknown room')
+            ? 400
+            : 500;
+        res.status(status).json({ error: error.message });
+    }
 });
 
 readNetworkFile().then(async () => {
