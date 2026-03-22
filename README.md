@@ -13,11 +13,11 @@ It also includes two UI pages:
 ## Start
 
 1. Install dependencies:
-	 - `npm install`
+    - `npm install`
 2. Start server:
-	 - `npm run start`
+    - `npm run start`
 3. Open:
-	 - `http://<server-ip>:63425/index.html`
+    - `http://<server-ip>:63425/index.html`
 
 ## Room Configuration
 
@@ -75,7 +75,7 @@ Notes:
 
 - Existing templates are in `labels/` and are used as fallback.
 - You can add room/model-specific templates under `labels/<templatePrefix>/`.
-	- Example: `labels/legacy/stor-true.label`
+    - Example: `labels/legacy/stor-true.label`
 
 ## Behavior
 

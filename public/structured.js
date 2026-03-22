@@ -57,7 +57,9 @@ function websitePrint() {
     })
         .then(async (response) => {
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: 'Print failed' }));
+                const errorData = await response
+                    .json()
+                    .catch(() => ({ error: 'Print failed' }));
                 throw new Error(errorData.error || 'Print failed');
             }
 
@@ -98,7 +100,9 @@ function websitePreview() {
         })
             .then(async (response) => {
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ error: 'Preview failed' }));
+                    const errorData = await response
+                        .json()
+                        .catch(() => ({ error: 'Preview failed' }));
                     throw new Error(errorData.error || 'Preview failed');
                 }
                 return response.text();
@@ -136,11 +140,16 @@ function displayDataInTable(data) {
 
         if (query) {
             const selectedColumns = [];
-            if (document.getElementById('search-benamning').checked) selectedColumns.push('Benämning');
-            if (document.getElementById('search-artikelnummer').checked) selectedColumns.push('Artikelnummer');
-            if (document.getElementById('search-artikelgrupp').checked) selectedColumns.push('Artikelgrupp');
-            if (document.getElementById('search-kortnamn').checked) selectedColumns.push('Kortnamn');
-            if (document.getElementById('search-barcode').checked) selectedColumns.push('Streckkod');
+            if (document.getElementById('search-benamning').checked)
+                selectedColumns.push('Benämning');
+            if (document.getElementById('search-artikelnummer').checked)
+                selectedColumns.push('Artikelnummer');
+            if (document.getElementById('search-artikelgrupp').checked)
+                selectedColumns.push('Artikelgrupp');
+            if (document.getElementById('search-kortnamn').checked)
+                selectedColumns.push('Kortnamn');
+            if (document.getElementById('search-barcode').checked)
+                selectedColumns.push('Streckkod');
 
             const columnIndices = selectedColumns
                 .map((col) => columnNames.indexOf(col))
@@ -148,13 +157,30 @@ function displayDataInTable(data) {
 
             const searchData = originalData.slice(1).filter((row) => {
                 return columnIndices.length > 0
-                    ? columnIndices.some((index) => row[index] && row[index].toString().toLowerCase().includes(query.toLowerCase()))
-                    : row.some((cell) => cell && cell.toString().toLowerCase().includes(query.toLowerCase()));
+                    ? columnIndices.some(
+                          (index) =>
+                              row[index] &&
+                              row[index]
+                                  .toString()
+                                  .toLowerCase()
+                                  .includes(query.toLowerCase()),
+                      )
+                    : row.some(
+                          (cell) =>
+                              cell &&
+                              cell
+                                  .toString()
+                                  .toLowerCase()
+                                  .includes(query.toLowerCase()),
+                      );
             });
 
-            dataToLoad = searchData.length > 0
-                ? dataToLoad.concat(searchData)
-                : dataToLoad.concat([new Array(originalData[0].length).fill('No results')]);
+            dataToLoad =
+                searchData.length > 0
+                    ? dataToLoad.concat(searchData)
+                    : dataToLoad.concat([
+                          new Array(originalData[0].length).fill('No results'),
+                      ]);
         } else {
             dataToLoad = originalData;
         }
@@ -162,11 +188,15 @@ function displayDataInTable(data) {
         hot.loadData(dataToLoad);
     };
 
-    document.getElementById('global-search').addEventListener('input', (event) => {
-        performSearch(event.target.value);
-    });
+    document
+        .getElementById('global-search')
+        .addEventListener('input', (event) => {
+            performSearch(event.target.value);
+        });
 
-    const checkboxes = document.querySelectorAll('#search-container input[type="checkbox"]');
+    const checkboxes = document.querySelectorAll(
+        '#search-container input[type="checkbox"]',
+    );
     checkboxes.forEach((checkbox) => {
         checkbox.addEventListener('change', () => {
             performSearch(document.getElementById('global-search').value);
@@ -190,14 +220,20 @@ function displayDataInTable(data) {
         const benamningIndex = columnNames.indexOf('Benämning');
         const artikelnummerIndex = columnNames.indexOf('Artikelnummer');
         const streckkodIndex = columnNames.indexOf('Streckkod');
-        const breddIndex = columnNames.findIndex((col) => String(col).toLowerCase().includes('bredd'));
+        const breddIndex = columnNames.findIndex((col) =>
+            String(col).toLowerCase().includes('bredd'),
+        );
 
-        document.getElementById('field-name').value = benamningIndex !== -1 ? (rowData[benamningIndex] || '') : '';
-        document.getElementById('field-artnum').value = artikelnummerIndex !== -1 ? (rowData[artikelnummerIndex] || '') : '';
-        document.getElementById('input-barcode').value = streckkodIndex !== -1 && rowData[streckkodIndex]
-            ? String(rowData[streckkodIndex]).slice(0, 12)
-            : '';
-        document.getElementById('field-width').value = breddIndex !== -1 ? (rowData[breddIndex] || '') : '';
+        document.getElementById('field-name').value =
+            benamningIndex !== -1 ? rowData[benamningIndex] || '' : '';
+        document.getElementById('field-artnum').value =
+            artikelnummerIndex !== -1 ? rowData[artikelnummerIndex] || '' : '';
+        document.getElementById('input-barcode').value =
+            streckkodIndex !== -1 && rowData[streckkodIndex]
+                ? String(rowData[streckkodIndex]).slice(0, 12)
+                : '';
+        document.getElementById('field-width').value =
+            breddIndex !== -1 ? rowData[breddIndex] || '' : '';
 
         websitePreview();
     });
@@ -217,15 +253,21 @@ function handleBarcodeReading(barcodeData) {
     const artikelnummerIndex = headers.indexOf('Artikelnummer');
     const streckkodIndex = headers.indexOf('Streckkod');
 
-    if (artikelnummerIndex === -1 || benamningIndex === -1 || streckkodIndex === -1) {
+    if (
+        artikelnummerIndex === -1 ||
+        benamningIndex === -1 ||
+        streckkodIndex === -1
+    ) {
         return;
     }
 
     for (let i = 1; i < data.length; i += 1) {
         const row = data[i];
         if (row[artikelnummerIndex]?.endsWith(artnum)) {
-            document.getElementById('field-name').value = row[benamningIndex] || '';
-            document.getElementById('field-artnum').value = row[artikelnummerIndex] || '';
+            document.getElementById('field-name').value =
+                row[benamningIndex] || '';
+            document.getElementById('field-artnum').value =
+                row[artikelnummerIndex] || '';
             document.getElementById('input-barcode').value = barcodeData;
             document.getElementById('global-search').value = barcodeData;
             document.getElementById('search-barcode').checked = true;

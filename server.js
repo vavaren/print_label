@@ -45,7 +45,11 @@ function buildStructuredElements(fields = {}) {
 
     for (const key of knownOrder) {
         const value = fields[key];
-        if (value !== undefined && value !== null && String(value).trim() !== '') {
+        if (
+            value !== undefined &&
+            value !== null &&
+            String(value).trim() !== ''
+        ) {
             lines.push(`${key}: ${String(value).trim()}`);
         }
     }
@@ -54,7 +58,11 @@ function buildStructuredElements(fields = {}) {
         if (knownOrder.includes(key)) {
             continue;
         }
-        if (value !== undefined && value !== null && String(value).trim() !== '') {
+        if (
+            value !== undefined &&
+            value !== null &&
+            String(value).trim() !== ''
+        ) {
             lines.push(`${key}: ${String(value).trim()}`);
         }
     }
@@ -64,14 +72,16 @@ function buildStructuredElements(fields = {}) {
     }
 
     return lines
-        .map((line) => `
+        .map((line) =>
+            `
 <Element>
     <String xml:space="preserve">${line}</String>
     <Attributes>
         <Font Family="Arial" Size="12" Bold="False" Italic="False" Underline="False" Strikeout="False" />
         <ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
     </Attributes>
-</Element>`.trim())
+</Element>`.trim(),
+        )
         .join('');
 }
 
@@ -99,18 +109,33 @@ function normalizeNetworkData(jsonData) {
         roomB: {
             id: 'roomB',
             label: 'Room B (Network 550)',
-            protocol: jsonData.roomB?.protocol || jsonData.protocol || DEFAULT_550_PROTOCOL,
-            endpoint: jsonData.roomB?.endpoint || `https://${jsonData.roomB?.ip || legacyIp}:${jsonData.roomB?.port || DEFAULT_NETWORK_PORT}`,
+            protocol:
+                jsonData.roomB?.protocol ||
+                jsonData.protocol ||
+                DEFAULT_550_PROTOCOL,
+            endpoint:
+                jsonData.roomB?.endpoint ||
+                `https://${jsonData.roomB?.ip || legacyIp}:${jsonData.roomB?.port || DEFAULT_NETWORK_PORT}`,
             timeoutMs: jsonData.roomB?.timeoutMs || DEFAULT_NETWORK_TIMEOUT_MS,
             retries: jsonData.roomB?.retries || DEFAULT_NETWORK_RETRIES,
             printers: {
                 liten: {
-                    name: jsonData.roomB?.printers?.liten?.name || jsonData.roomB?.printerName || 'DYMO 550 5XL',
-                    templatePrefix: jsonData.roomB?.printers?.liten?.templatePrefix || 'legacy',
+                    name:
+                        jsonData.roomB?.printers?.liten?.name ||
+                        jsonData.roomB?.printerName ||
+                        'DYMO 550 5XL',
+                    templatePrefix:
+                        jsonData.roomB?.printers?.liten?.templatePrefix ||
+                        'legacy',
                 },
                 stor: {
-                    name: jsonData.roomB?.printers?.stor?.name || jsonData.roomB?.printerName || 'DYMO 550 5XL',
-                    templatePrefix: jsonData.roomB?.printers?.stor?.templatePrefix || 'legacy',
+                    name:
+                        jsonData.roomB?.printers?.stor?.name ||
+                        jsonData.roomB?.printerName ||
+                        'DYMO 550 5XL',
+                    templatePrefix:
+                        jsonData.roomB?.printers?.stor?.templatePrefix ||
+                        'legacy',
                 },
             },
         },
@@ -209,7 +234,12 @@ function resolveRoute(reqData) {
 }
 
 function resolveLabelTemplatePath(route, labelSize, ifBarcode) {
-    const routePath = path.join(__dirname, 'labels', route.templatePrefix, `${labelSize}-${ifBarcode}.label`);
+    const routePath = path.join(
+        __dirname,
+        'labels',
+        route.templatePrefix,
+        `${labelSize}-${ifBarcode}.label`,
+    );
     if (fs.existsSync(routePath)) {
         return routePath;
     }
@@ -232,10 +262,13 @@ async function tryRawSocket(endpoint) {
     const portValue = Number(url.port || 9100);
 
     await new Promise((resolve, reject) => {
-        const socket = net.createConnection({ host, port: portValue, timeout: 1500 }, () => {
-            socket.end();
-            resolve();
-        });
+        const socket = net.createConnection(
+            { host, port: portValue, timeout: 1500 },
+            () => {
+                socket.end();
+                resolve();
+            },
+        );
         socket.on('error', reject);
         socket.on('timeout', () => {
             socket.destroy(new Error('Socket timeout'));
@@ -260,9 +293,10 @@ async function probeRoomBProtocol() {
         return;
     }
 
-    const candidates = roomB.protocol === 'auto'
-        ? ['dymo-http', 'raw']
-        : [roomB.protocol || DEFAULT_550_PROTOCOL];
+    const candidates =
+        roomB.protocol === 'auto'
+            ? ['dymo-http', 'raw']
+            : [roomB.protocol || DEFAULT_550_PROTOCOL];
 
     for (const candidate of candidates) {
         try {
@@ -310,7 +344,14 @@ app.post('/config/room', (req, res) => {
     }
 });
 
-async function labelStringManipulation(route, label_size, if_barcode, text, alignment, barcode) {
+async function labelStringManipulation(
+    route,
+    label_size,
+    if_barcode,
+    text,
+    alignment,
+    barcode,
+) {
     const filePath = resolveLabelTemplatePath(route, label_size, if_barcode);
     return await readLabelFile(filePath, text, alignment, barcode);
 }
@@ -324,15 +365,18 @@ async function sendPrintOperation(route, operation, payload) {
         const portValue = Number(endpoint.port || 9100);
 
         await new Promise((resolve, reject) => {
-            const socket = net.createConnection({
-                host: endpoint.hostname,
-                port: portValue,
-                timeout: route.timeoutMs,
-            }, () => {
-                socket.write(payload);
-                socket.end();
-                resolve();
-            });
+            const socket = net.createConnection(
+                {
+                    host: endpoint.hostname,
+                    port: portValue,
+                    timeout: route.timeoutMs,
+                },
+                () => {
+                    socket.write(payload);
+                    socket.end();
+                    resolve();
+                },
+            );
             socket.on('error', reject);
             socket.on('timeout', () => {
                 socket.destroy(new Error('Socket timeout'));
@@ -355,7 +399,7 @@ async function sendPrintOperation(route, operation, payload) {
             },
             httpsAgent: agent,
             timeout: route.timeoutMs,
-        }
+        },
     );
 
     return response.data;
@@ -385,7 +429,7 @@ async function previewLabel(reqData, payloadBuilder) {
         reqData.if_barcode,
         payload.xml,
         payload.alignment,
-        reqData.barcode
+        reqData.barcode,
     );
 
     const label = `printerName=&renderParamsXml=&labelXml=${encodeURIComponent(labelXml)}&labelSetXml=`;
@@ -403,7 +447,7 @@ async function printLabel(reqData, payloadBuilder) {
         reqData.if_barcode,
         payload.xml,
         payload.alignment,
-        reqData.barcode
+        reqData.barcode,
     );
 
     const printParamsXml = `<LabelWriterPrintParams><Copies>${copies}</Copies><PrintQuality>Text</PrintQuality></LabelWriterPrintParams>`;
@@ -460,17 +504,23 @@ app.get('/print', async (req, res) => {
         await printLabel(req.query, () => buildClassicPayload(req.query));
         res.sendStatus(200);
     } catch (error) {
-        const status = String(error.message).includes('Unknown room') ? 400 : 500;
+        const status = String(error.message).includes('Unknown room')
+            ? 400
+            : 500;
         res.status(status).json({ error: error.message });
     }
 });
 
 app.get('/preview', async (req, res) => {
     try {
-        const label = await previewLabel(req.query, () => buildClassicPayload(req.query));
+        const label = await previewLabel(req.query, () =>
+            buildClassicPayload(req.query),
+        );
         res.send(label);
     } catch (error) {
-        const status = String(error.message).includes('Unknown room') ? 400 : 500;
+        const status = String(error.message).includes('Unknown room')
+            ? 400
+            : 500;
         res.status(status).json({ error: error.message });
     }
 });
@@ -487,7 +537,11 @@ app.post('/print-structured', async (req, res) => {
         await printLabel(payload, () => buildStructuredPayload(payload));
         res.sendStatus(200);
     } catch (error) {
-        const status = String(error.message).includes('Unknown room') || String(error.message).includes('configuration missing') ? 400 : 500;
+        const status =
+            String(error.message).includes('Unknown room') ||
+            String(error.message).includes('configuration missing')
+                ? 400
+                : 500;
         res.status(status).json({ error: error.message });
     }
 });
@@ -500,10 +554,16 @@ app.post('/preview-structured', async (req, res) => {
             if_barcode: req.body.if_barcode || 'false',
             barcode: req.body.barcode || '',
         });
-        const label = await previewLabel(payload, () => buildStructuredPayload(payload));
+        const label = await previewLabel(payload, () =>
+            buildStructuredPayload(payload),
+        );
         res.send(label);
     } catch (error) {
-        const status = String(error.message).includes('Unknown room') || String(error.message).includes('configuration missing') ? 400 : 500;
+        const status =
+            String(error.message).includes('Unknown room') ||
+            String(error.message).includes('configuration missing')
+                ? 400
+                : 500;
         res.status(status).json({ error: error.message });
     }
 });
@@ -520,7 +580,8 @@ app.get('/diagnostics', (req, res) => {
 readNetworkFile().then(async () => {
     await probeRoomBProtocol();
     app.listen(port, '0.0.0.0', () => {
-        const roomAEndpoint = roomConfig?.roomA?.endpoint || DEFAULT_450_ENDPOINT;
+        const roomAEndpoint =
+            roomConfig?.roomA?.endpoint || DEFAULT_450_ENDPOINT;
         const host = new URL(roomAEndpoint).hostname;
         console.log(`Server listening at http://0.0.0.0:${port}`);
         console.log(`Access the server at http://${host}:${port}`);

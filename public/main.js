@@ -5,14 +5,14 @@ let host = window.location.hostname || '127.0.0.1';
 let activeRoom = localStorage.getItem(STORAGE_ROOM_KEY) || 'roomA';
 
 fetch('/network')
-    .then(response => response.text())
-    .then(data => {
+    .then((response) => response.text())
+    .then((data) => {
         if (data) {
             host = data;
         }
         console.log(`Host: ${host}`);
     })
-    .catch(err => console.error('Error fetching network file:', err));
+    .catch((err) => console.error('Error fetching network file:', err));
 
 const patterns = ["köksrutan", "malen", "båstad", "hov", "troentorp", "skanör", "classic", 
     "råå", "lin i kvadrat", "domsten", "brantevik", "herrgård", "davids harpa", "rutan", 
@@ -37,9 +37,10 @@ fetch('/config/rooms')
         });
 
         const persistedRoom = localStorage.getItem(STORAGE_ROOM_KEY);
-        activeRoom = persistedRoom && data.rooms[persistedRoom]
-            ? persistedRoom
-            : (data.activeRoom || 'roomA');
+        activeRoom =
+            persistedRoom && data.rooms[persistedRoom]
+                ? persistedRoom
+                : data.activeRoom || 'roomA';
 
         roomSelect.value = activeRoom;
         localStorage.setItem(STORAGE_ROOM_KEY, activeRoom);
@@ -54,21 +55,20 @@ var quill = new Quill('#editor-container', {
     theme: 'snow',
     modules: {
         toolbar: [
-            ['bold', 'italic', 'underline', "strike"], [{ 'align': 'center' }]
-
-        ]
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ align: 'center' }],
+        ],
     },
     placeholder: 'Namn',
 });
-quill.root.style.textAlign="center"
+quill.root.style.textAlign = 'center';
 quill.format('align', 'center');
-quill.on('text-change', function() {
+quill.on('text-change', function () {
     const format = quill.getFormat();
     if (format.align !== 'center') {
         quill.format('align', 'center');
     }
 });
-
 
 function websitePrint() {
     const button = document.querySelector('button[onclick="websitePrint()"]');
@@ -76,14 +76,24 @@ function websitePrint() {
     button.classList.add('bg-slate-700');
 
     const text = encodeURIComponent(quill.root.innerHTML);
-    const barcode = encodeURIComponent(document.getElementById('input-barcode').value);
-    const copies = encodeURIComponent(document.getElementById('input-copies').value);
-    const label_size = encodeURIComponent(document.getElementById('input-size').value);
-    const if_barcode = encodeURIComponent(document.getElementById('if-barcode').value);
+    const barcode = encodeURIComponent(
+        document.getElementById('input-barcode').value,
+    );
+    const copies = encodeURIComponent(
+        document.getElementById('input-copies').value,
+    );
+    const label_size = encodeURIComponent(
+        document.getElementById('input-size').value,
+    );
+    const if_barcode = encodeURIComponent(
+        document.getElementById('if-barcode').value,
+    );
     const room = encodeURIComponent(activeRoom);
 
-    fetch(`http://${host}:${port}/print?text=${text}&barcode=${barcode}&label_size=${label_size}&if_barcode=${if_barcode}&copies=${copies}&room=${room}`)
-        .then(response => {
+    fetch(
+        `http://${host}:${port}/print?text=${text}&barcode=${barcode}&label_size=${label_size}&if_barcode=${if_barcode}&copies=${copies}&room=${room}`,
+    )
+        .then((response) => {
             button.classList.remove('bg-slate-700');
             if (response.ok) {
                 button.classList.add('bg-green-500');
@@ -96,8 +106,8 @@ function websitePrint() {
             }, 2000);
             return response.text();
         })
-        .then(data => console.log(data))
-        .catch(err => {
+        .then((data) => console.log(data))
+        .catch((err) => {
             console.error(err);
             button.classList.remove('bg-slate-700');
             button.classList.add('bg-red-500');
@@ -117,18 +127,28 @@ function websitePreview() {
 
     previewTimeout = setTimeout(() => {
         const text = encodeURIComponent(quill.root.innerHTML);
-        const barcode = encodeURIComponent(document.getElementById('input-barcode').value);
-        const label_size = encodeURIComponent(document.getElementById('input-size').value);
-        const if_barcode = encodeURIComponent(document.getElementById('if-barcode').value);
+        const barcode = encodeURIComponent(
+            document.getElementById('input-barcode').value,
+        );
+        const label_size = encodeURIComponent(
+            document.getElementById('input-size').value,
+        );
+        const if_barcode = encodeURIComponent(
+            document.getElementById('if-barcode').value,
+        );
         const room = encodeURIComponent(activeRoom);
 
-        fetch(`http://${host}:${port}/preview?text=${text}&barcode=${barcode}&label_size=${label_size}&if_barcode=${if_barcode}&room=${room}`)
+        fetch(
+            `http://${host}:${port}/preview?text=${text}&barcode=${barcode}&label_size=${label_size}&if_barcode=${if_barcode}&room=${room}`,
+        )
             .then((response) => response.text()) // Correctly parse the response as text
             .then((base64Image) => {
                 const imageSrc = `data:image/png;base64,${base64Image}`;
                 document.getElementById('preview-label').src = imageSrc; // Set the base64 image as the source
             })
-            .catch((error) => console.error('Error fetching the image:', error));
+            .catch((error) =>
+                console.error('Error fetching the image:', error),
+            );
     }, 300); // Delay preview updates by 300ms
 }
 fetch('./Visma-artiklar-03012025.xlsx')
@@ -145,7 +165,7 @@ function displayDataInTable(data) {
     const container = document.getElementById('excel-data');
     const originalData = [...data];
     hot = new Handsontable(container, {
-        licenseKey: "non-commercial-and-evaluation",
+        licenseKey: 'non-commercial-and-evaluation',
         data: data,
         rowHeaders: true,
         colHeaders: true,
@@ -165,21 +185,47 @@ function displayDataInTable(data) {
 
         if (query) {
             const selectedColumns = [];
-            if (document.getElementById('search-benamning').checked) selectedColumns.push('Benämning');
-            if (document.getElementById('search-artikelnummer').checked) selectedColumns.push('Artikelnummer');
-            if (document.getElementById('search-artikelgrupp').checked) selectedColumns.push('Artikelgrupp');
-            if (document.getElementById('search-kortnamn').checked) selectedColumns.push('Kortnamn');
-            if (document.getElementById('search-barcode').checked) selectedColumns.push('Streckkod');
+            if (document.getElementById('search-benamning').checked)
+                selectedColumns.push('Benämning');
+            if (document.getElementById('search-artikelnummer').checked)
+                selectedColumns.push('Artikelnummer');
+            if (document.getElementById('search-artikelgrupp').checked)
+                selectedColumns.push('Artikelgrupp');
+            if (document.getElementById('search-kortnamn').checked)
+                selectedColumns.push('Kortnamn');
+            if (document.getElementById('search-barcode').checked)
+                selectedColumns.push('Streckkod');
 
-            const columnIndices = selectedColumns.map(col => columnNames.indexOf(col)).filter(index => index !== -1);
+            const columnIndices = selectedColumns
+                .map((col) => columnNames.indexOf(col))
+                .filter((index) => index !== -1);
 
             const searchData = originalData.slice(1).filter((row) => {
                 return columnIndices.length > 0
-                    ? columnIndices.some(index => row[index] && row[index].toString().toLowerCase().includes(query.toLowerCase()))
-                    : row.some(cell => cell && cell.toString().toLowerCase().includes(query.toLowerCase()));
+                    ? columnIndices.some(
+                          (index) =>
+                              row[index] &&
+                              row[index]
+                                  .toString()
+                                  .toLowerCase()
+                                  .includes(query.toLowerCase()),
+                      )
+                    : row.some(
+                          (cell) =>
+                              cell &&
+                              cell
+                                  .toString()
+                                  .toLowerCase()
+                                  .includes(query.toLowerCase()),
+                      );
             });
 
-            dataToLoad = searchData.length > 0 ? dataToLoad.concat(searchData) : dataToLoad.concat([new Array(originalData[0].length).fill('No results')]);
+            dataToLoad =
+                searchData.length > 0
+                    ? dataToLoad.concat(searchData)
+                    : dataToLoad.concat([
+                          new Array(originalData[0].length).fill('No results'),
+                      ]);
         } else {
             dataToLoad = originalData;
         }
@@ -188,12 +234,16 @@ function displayDataInTable(data) {
     };
 
     // Event listener for global search input
-    document.getElementById('global-search').addEventListener('input', (event) => {
-        performSearch(event.target.value);
-    });
+    document
+        .getElementById('global-search')
+        .addEventListener('input', (event) => {
+            performSearch(event.target.value);
+        });
 
     // Event listeners for checkboxes
-    const checkboxes = document.querySelectorAll('#search-container input[type="checkbox"]');
+    const checkboxes = document.querySelectorAll(
+        '#search-container input[type="checkbox"]',
+    );
     checkboxes.forEach((checkbox) => {
         checkbox.addEventListener('change', () => {
             performSearch(document.getElementById('global-search').value);
@@ -247,15 +297,16 @@ function displayDataInTable(data) {
             const streckkodData = rowData[streckkodIndex];
 
             quill.root.innerHTML = benamningData;
-            // console.log(benamningData)
-            document.getElementById('input-barcode').value = streckkodData ? streckkodData.slice(0, 12) : '';
+            document.getElementById('input-barcode').value = streckkodData
+                ? streckkodData.slice(0, 12)
+                : '';
 
             websitePreview();
         }
     });
 }
 
-function handleBarcodeReading(barcodeData){
+function handleBarcodeReading(barcodeData) {
     console.log(barcodeData);
 
     if (barcodeData.length === 13 && typeof barcodeData === 'string') {
@@ -272,7 +323,11 @@ function handleBarcodeReading(barcodeData){
         const artikelnummerIndex = headers.indexOf('Artikelnummer');
         const streckkodIndex = headers.indexOf('Streckkod'); // Add index for Streckkod
 
-        if (artikelnummerIndex !== -1 && benamningIndex !== -1 && streckkodIndex !== -1) {
+        if (
+            artikelnummerIndex !== -1 &&
+            benamningIndex !== -1 &&
+            streckkodIndex !== -1
+        ) {
             for (let i = 1; i < data.length; i++) {
                 const row = data[i];
                 if (row[artikelnummerIndex]?.endsWith(artnum)) {
@@ -280,14 +335,16 @@ function handleBarcodeReading(barcodeData){
 
                     // Write the results into Quill and input-barcode
                     quill.root.innerHTML = benamning || '';
-                    document.getElementById('input-barcode').value = barcodeData;
+                    document.getElementById('input-barcode').value =
+                        barcodeData;
 
                     // Update search bar and check Streckkod checkbox
-                    document.getElementById('global-search').value = barcodeData;
+                    document.getElementById('global-search').value =
+                        barcodeData;
                     document.getElementById('search-barcode').checked = true;
 
                     console.log('Found Benämning:', benamning);
-                    performSearch(barcodeData)
+                    performSearch(barcodeData);
                     return; // Exit once a match is found
                 }
             }
@@ -301,10 +358,6 @@ function handleBarcodeReading(barcodeData){
     }
 }
 
-
-
-
-
 // Barcode reading mode toggle
 const barcodeReadingCheckbox = document.getElementById('barcode-reading');
 barcodeReadingCheckbox.addEventListener('change', (event) => {
@@ -313,33 +366,38 @@ barcodeReadingCheckbox.addEventListener('change', (event) => {
         document.addEventListener('keydown', handleGlobalBarcodeInput);
     } else {
         document.removeEventListener('keydown', handleGlobalBarcodeInput);
-    } 
+    }
 });
 
-let barcodeBuffer = "";
+let barcodeBuffer = '';
 let barcodeTimeout;
 function handleGlobalBarcodeInput(event) {
-    if (event.key.length === 1) { // Only consider printable characters
+    if (event.key.length === 1) {
+        // Only consider printable characters
         barcodeBuffer += event.key;
         clearTimeout(barcodeTimeout);
         barcodeTimeout = setTimeout(() => {
             handleBarcodeReading(barcodeBuffer); // Call the user-defined function
-            barcodeBuffer = "";
+            barcodeBuffer = '';
         }, 50);
     }
 }
 
 // Attach event listeners to the input fields
 quill.on('text-change', websitePreview);
-document.getElementById('input-barcode').addEventListener('input', websitePreview);
+document
+    .getElementById('input-barcode')
+    .addEventListener('input', websitePreview);
 document.getElementById('input-size').addEventListener('input', websitePreview);
 document.getElementById('if-barcode').addEventListener('input', websitePreview);
 
-document.getElementById('print-button').addEventListener('keydown', function(event) {
-    if (event.code === 'Space') {       
-        event.preventDefault();
-    }
-});
+document
+    .getElementById('print-button')
+    .addEventListener('keydown', function (event) {
+        if (event.code === 'Space') {
+            event.preventDefault();
+        }
+    });
 
 const roomSelect = document.getElementById('room-select');
 if (roomSelect) {
