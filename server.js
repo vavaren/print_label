@@ -5,8 +5,8 @@ import cors from 'cors';
 import https from 'https';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { parseHTMLToXML } from './parse-html-to-xml.js';
-import { readLabelFile } from './read-label-file.js';
+import { parseHTMLToXML } from './scripts/parse-html-to-xml.js';
+import { readLabelFile } from './scripts/read-label-file.js';
 import fs from 'fs'; // Add this line
 
 const app = express();

@@ -1,5 +1,0 @@
-express
-axios
-cors
-he
-xml2js
