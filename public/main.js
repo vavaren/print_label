@@ -1,11 +1,15 @@
 const port = 63425;
+const STORAGE_ROOM_KEY = 'activeRoom';
 
-let host;
+let host = window.location.hostname || '127.0.0.1';
+let activeRoom = localStorage.getItem(STORAGE_ROOM_KEY) || 'roomA';
 
 fetch('/network')
     .then(response => response.text())
     .then(data => {
-        host = data;
+        if (data) {
+            host = data;
+        }
         console.log(`Host: ${host}`);
     })
     .catch(err => console.error('Error fetching network file:', err));
@@ -15,6 +19,32 @@ const patterns = ["köksrutan", "malen", "båstad", "hov", "troentorp", "skanör
     "tylösand", "lya", "sofiero", "steninge", "grevie", "gastronomi", "clublinne", "mormor", 
     "skåne", "kattegatt", "royal", "småryd", "viken", "falsterbo", "arild", "gåsöga", "vejby", 
     "torekov", "lervik", "kattvik", "tryck", "brodyr", "svinnsmart" ]
+
+fetch('/config/rooms')
+    .then((response) => response.json())
+    .then((data) => {
+        const roomSelect = document.getElementById('room-select');
+        if (!roomSelect || !data?.rooms) {
+            return;
+        }
+
+        roomSelect.innerHTML = '';
+        Object.entries(data.rooms).forEach(([roomKey, roomValue]) => {
+            const option = document.createElement('option');
+            option.value = roomKey;
+            option.textContent = roomValue.label || roomKey;
+            roomSelect.appendChild(option);
+        });
+
+        const persistedRoom = localStorage.getItem(STORAGE_ROOM_KEY);
+        activeRoom = persistedRoom && data.rooms[persistedRoom]
+            ? persistedRoom
+            : (data.activeRoom || 'roomA');
+
+        roomSelect.value = activeRoom;
+        localStorage.setItem(STORAGE_ROOM_KEY, activeRoom);
+    })
+    .catch((err) => console.error('Error fetching room config:', err));
 
 let hot;
 let performSearch;
@@ -50,8 +80,9 @@ function websitePrint() {
     const copies = encodeURIComponent(document.getElementById('input-copies').value);
     const label_size = encodeURIComponent(document.getElementById('input-size').value);
     const if_barcode = encodeURIComponent(document.getElementById('if-barcode').value);
+    const room = encodeURIComponent(activeRoom);
 
-    fetch(`http://${host}:${port}/print?text=${text}&barcode=${barcode}&label_size=${label_size}&if_barcode=${if_barcode}&copies=${copies}`)
+    fetch(`http://${host}:${port}/print?text=${text}&barcode=${barcode}&label_size=${label_size}&if_barcode=${if_barcode}&copies=${copies}&room=${room}`)
         .then(response => {
             button.classList.remove('bg-slate-700');
             if (response.ok) {
@@ -74,6 +105,11 @@ function websitePrint() {
                 button.classList.remove('bg-red-500');
                 button.classList.add('bg-slate-800');
             }, 2000);
+        })
+        .finally(() => {
+            const copiesInput = document.getElementById('input-copies');
+            copiesInput.value = '1';
+            websitePreview();
         });
 }
 function websitePreview() {
@@ -84,8 +120,9 @@ function websitePreview() {
         const barcode = encodeURIComponent(document.getElementById('input-barcode').value);
         const label_size = encodeURIComponent(document.getElementById('input-size').value);
         const if_barcode = encodeURIComponent(document.getElementById('if-barcode').value);
+        const room = encodeURIComponent(activeRoom);
 
-        fetch(`http://${host}:${port}/preview?text=${text}&barcode=${barcode}&label_size=${label_size}&if_barcode=${if_barcode}`)
+        fetch(`http://${host}:${port}/preview?text=${text}&barcode=${barcode}&label_size=${label_size}&if_barcode=${if_barcode}&room=${room}`)
             .then((response) => response.text()) // Correctly parse the response as text
             .then((base64Image) => {
                 const imageSrc = `data:image/png;base64,${base64Image}`;
@@ -303,3 +340,21 @@ document.getElementById('print-button').addEventListener('keydown', function(eve
         event.preventDefault();
     }
 });
+
+const roomSelect = document.getElementById('room-select');
+if (roomSelect) {
+    roomSelect.addEventListener('change', (event) => {
+        activeRoom = event.target.value;
+        localStorage.setItem(STORAGE_ROOM_KEY, activeRoom);
+
+        fetch('/config/room', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ room: activeRoom }),
+        }).catch((err) => console.error('Error updating room:', err));
+
+        websitePreview();
+    });
+}

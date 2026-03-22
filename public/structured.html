@@ -2,25 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Print Label</title>
+    <title>Print Label Structured</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css">
     <link rel="stylesheet" href="../dist/style.css">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen bg-slate-200 select-none">
     <nav class="sticky top-0 z-50 bg-slate-900 text-white px-4 py-3 border-b border-slate-700">
         <div class="flex items-center gap-4 flex-wrap">
-            <a href="./index.html" class="font-semibold bg-slate-700 px-3 py-1 rounded">Klassisk vy</a>
-            <a href="./structured.html" class="font-semibold bg-slate-800 px-3 py-1 rounded hover:bg-slate-700">Strukturerad vy</a>
-            <label for="room-select" class="text-slate-200 ml-auto">Rum:</label>
-            <select id="room-select" class="text-slate-900 rounded px-2 py-1 bg-white">
-                <option value="roomA">Room A (USB 450)</option>
-                <option value="roomB">Room B (Network 550)</option>
-            </select>
+            <a href="./index.html" class="font-semibold bg-slate-800 px-3 py-1 rounded hover:bg-slate-700">Klassisk vy</a>
+            <a href="./structured.html" class="font-semibold bg-slate-700 px-3 py-1 rounded">Strukturerad vy</a>
+            <span class="ml-auto text-slate-200">Printer: Room B (Network 550)</span>
         </div>
     </nav>
+
     <div class="flex h-[calc(100vh-57px)]">
         <div id="menu" class="bg-slate-500 w-[30vw] p-7 flex-shrink-0 sticky top-[57px] h-[calc(100vh-57px)] overflow-auto">
             <div class="bg-slate-100 w-auto inline-flex items-center py-1 px-2 rounded border border-slate-300 mb-2">
@@ -33,12 +29,15 @@
                     <span class="ml-3 text-gray-700">Streckkodsläsning</span>
                 </label>
             </div>
-            <div class="bg-white">
-                <div id="editor-container" class="mb-2 p-2 border rounded h-[15vh] w-full"></div>
+            <div class="bg-white mb-2 p-2 border rounded">
+                <input id="field-name" type="text" placeholder="Namn" class="mb-2 p-2 border rounded w-full" value="">
+                <input id="field-artnum" type="text" placeholder="Artikelnummer" class="mb-2 p-2 border rounded w-full" value="">
+                <input id="field-num-meters" type="text" placeholder="Antal meter" class="mb-2 p-2 border rounded w-full" value="">
+                <input id="field-width" type="text" placeholder="Bredd" class="p-2 border rounded w-full" value="">
             </div>
             <input id="input-barcode" type="text" placeholder="Streckkod" class="mb-2 p-2 border rounded w-full" value="">
             <input id="input-copies" type="number" placeholder="Antal" class="mb-2 p-2 border rounded w-full" value="1">
-            <div class="">
+            <div>
                 <select id="input-size" class="p-2 mb-2 border rounded bg-white">
                     <option value="stor">Stor</option>
                     <option value="liten">Liten</option>
@@ -48,7 +47,8 @@
                     <option value="false">Utan streckkod</option>
                 </select>
             </div>
-            <button id="print-button" class="bg-slate-800 bg-slate-700:active text-white p-2 mb-2 rounded w-full" onclick="websitePrint()" tabindex="-1">Skriv ut</button><img id="preview-label" src="" class="" />
+            <button id="print-button" class="bg-slate-800 bg-slate-700:active text-white p-2 mb-2 rounded w-full" tabindex="-1">Skriv ut</button><img id="preview-label" src="" class="" alt="Label preview" />
+            <p id="status-text" class="text-sm text-slate-100 mb-2"></p>
             <div id="search-container" class="mb-4 p-4">
                 <input id="global-search" type="text" placeholder="Sök..." class="mb-2 p-2 border rounded w-full">
                 <div>
@@ -93,7 +93,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    <script src="./main.js"></script>
+    <script src="./structured.js"></script>
 </body>
 </html>
