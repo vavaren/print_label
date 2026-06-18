@@ -74,7 +74,13 @@ function websitePrint() {
                 button.classList.remove('bg-red-500');
                 button.classList.add('bg-slate-800');
             }, 2000);
-        });
+            
+        })
+        .finally(() => {
+            const copiesInput = document.getElementById('input-copies');
+            copiesInput.value = '1';
+            websitePreview();
+        });;
 }
 function websitePreview() {
     clearTimeout(previewTimeout); // Clear any existing timeout
